@@ -5,6 +5,7 @@ import { RootState } from '../redux/store';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import FormFieldRenderer from '../components/FormFieldRenderer';
+import { formulaHelpers } from '../utils/formulas';
 
 const PreviewForm = () => {
   const { fields, formName, description } = useSelector((state: RootState) => state.form);
@@ -13,35 +14,54 @@ const PreviewForm = () => {
 
   useEffect(() => {
     const updatedValues = { ...values };
-    fields.forEach(field => {
-      if (field.isDerived && field.formula && field.parentFields) {
+
+    fields.forEach((field) => {
+      if (field.isDerived && field.formula && field.parentFields?.length) {
         try {
-          const formulaFn = new Function(...field.parentFields, `return ${field.formula}`);
-          const parentValues = field.parentFields.map(id => Number(values[id]) || 0);
-          updatedValues[field.id] = formulaFn(...parentValues);
+          let code = field.formula;
+
+          // Replace placeholders {id} with actual JSON values
+          field.parentFields.forEach((pid: string) => {
+            const val = values[pid] ?? '';
+            code = code.replaceAll(`{${pid}}`, JSON.stringify(val));
+          });
+
+          // Create a function with helpers available
+          // eslint-disable-next-line no-new-func
+          const fn = new Function(
+            'helpers',
+            `with(helpers) { return (${code}); }`
+          );
+
+          updatedValues[field.id] = fn(formulaHelpers);
         } catch {
           updatedValues[field.id] = 'Error';
         }
       }
     });
+
     setValues(updatedValues);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [JSON.stringify(values), fields]);
 
   const handleChange = (id: string, value: any) => {
-    setValues(prev => ({ ...prev, [id]: value }));
+    setValues((prev) => ({ ...prev, [id]: value }));
   };
 
   const handleSetError = (id: string, err: string | null) => {
-    setErrors(prev => ({ ...prev, [id]: err }));
+    setErrors((prev) => ({ ...prev, [id]: err }));
   };
 
   return (
     <Container maxWidth="sm" sx={{ py: 5 }}>
       <ToastContainer position="bottom-right" autoClose={3000} />
-      <Typography variant="h4" fontWeight={600} mb={0.5}>{formName || 'Form Preview'}</Typography>
+      <Typography variant="h4" fontWeight={600} mb={0.5}>
+        {formName || 'Form Preview'}
+      </Typography>
       {description && (
-        <Typography variant="body2" color="text.secondary" mb={3}>{description}</Typography>
+        <Typography variant="body2" color="text.secondary" mb={3}>
+          {description}
+        </Typography>
       )}
       <Divider sx={{ mb: 3 }} />
 

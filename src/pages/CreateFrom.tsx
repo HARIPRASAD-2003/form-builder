@@ -54,22 +54,37 @@ const CreateForm = () => {
     };
 
     const handleSaveForm = () => {
-        if (title.trim() === '') setTitle("Untitled Form");
+        if (title.trim() === "") setTitle("Untitled Form");
 
         dispatch(setFormMeta({ formName: title, description: desc }));
+
+        const savedForms = JSON.parse(localStorage.getItem("forms") || "[]");
+
+        // Check if this form already exists (match by formName or better: uniqueId)
+        const existingIndex = savedForms.findIndex(
+            (f: any) => f.formName === title
+        );
 
         const saved = {
             formName: title,
             description: desc,
             fields,
-            timestamp: new Date().toISOString()
+            timestamp: existingIndex >= 0 ? savedForms[existingIndex].timestamp : new Date().toISOString(), // keep old timestamp if updating
         };
 
-        const savedForms = JSON.parse(localStorage.getItem('forms') || '[]');
-        localStorage.setItem('forms', JSON.stringify([...savedForms, saved]));
+        if (existingIndex >= 0) {
+            // Update existing form
+            savedForms[existingIndex] = saved;
+            toast.success("Form updated!");
+        } else {
+            // Add as new form
+            savedForms.push(saved);
+            toast.success("Form saved to localStorage!");
+        }
 
-        toast.success('Form saved to localStorage!');
+        localStorage.setItem("forms", JSON.stringify(savedForms));
     };
+
 
 
     const moveField = (from: number, to: number) => {
