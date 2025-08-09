@@ -13,30 +13,41 @@ const Navbar = () => {
   ];
 
   return (
-    <AppBar position="static" color="primary">
-      <Toolbar>
-        <Typography variant="h6" sx={{ flexGrow: 1, fontWeight: 600 }}>
-          🧩 Form Builder
-        </Typography>
+    <>
+      <AppBar position="fixed" color="primary">
+        <Toolbar>
+          <Typography
+            variant="h6"
+            sx={{ flexGrow: 1, fontWeight: 600, cursor: 'pointer' }}
+            onClick={() => navigate('/')}
+          >
+            🧩 Form Builder
+          </Typography>
 
-        <Box>
-          {navItems.map((item) => (
-            <Button
-              key={item.path}
-              color="inherit"
-              sx={{
-                fontWeight: location.pathname === item.path ? 'bold' : 'normal',
-                borderBottom: location.pathname === item.path ? '2px solid white' : 'none',
-                borderRadius: 0,
-              }}
-              onClick={() => navigate(item.path)}
-            >
-              {item.label}
-            </Button>
-          ))}
-        </Box>
-      </Toolbar>
-    </AppBar>
+          <Box>
+            {navItems.map((item) => (
+              <Button
+                key={item.path}
+                color="inherit"
+                sx={{
+                  fontWeight: location.pathname === item.path ? 'bold' : 'normal',
+                  borderBottom: location.pathname === item.path ? '2px solid white' : 'none',
+                  borderRadius: 0,
+                }}
+                onClick={() => navigate(item.path)}
+              >
+                {item.label}
+              </Button>
+            ))}
+          </Box>
+        </Toolbar>
+      </AppBar>
+
+      {/* Add top padding to avoid content being hidden behind the fixed Navbar */}
+      <Box sx={{ paddingTop: '64px' }}>
+        {/* Your page content goes here */}
+      </Box>
+    </>
   );
 };
 

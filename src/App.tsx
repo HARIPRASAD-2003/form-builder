@@ -6,6 +6,7 @@ import MyForms from './pages/MyForms';
 import Navbar from './components/Navbar';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import LandingPage from './pages/LandingPage';
 
 function App() {
   return (
@@ -28,7 +29,7 @@ function App() {
         <Route path="/create" element={<CreateForm />} />
         <Route path="/preview" element={<PreviewForm />} />
         <Route path="/myforms" element={<MyForms />} />
-        <Route path="*" element={<CreateForm />} />
+        <Route path="*" element={<LandingPage />} />
       </Routes>
     </Router>
   );
