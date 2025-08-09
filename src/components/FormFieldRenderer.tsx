@@ -25,7 +25,6 @@ const validateField = (value: any, field: any): string | null => {
   const minLength = Number(validations.minLength);
   const maxLength = Number(validations.maxLength);
 
-  console.log(validations);
   if (!isNaN(minLength) && valLength < minLength) {
     return `Minimum length is ${minLength}`;
   }

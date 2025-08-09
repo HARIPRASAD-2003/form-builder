@@ -67,7 +67,7 @@ const ValidationModal = ({ open, onClose, field, onSave }: any) => {
 
   const handleSubmit = () => {
     if (!validate(local)) return;
-    onSave({ ...field, validations: local });
+    onSave(local);
     onClose();
   };
 
