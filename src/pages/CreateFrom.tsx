@@ -1,7 +1,6 @@
 import React from 'react';
 import {
-    Box, Button, Container, IconButton, MenuItem, Paper, TextField,
-    Typography, Checkbox, FormControlLabel, Select, useTheme
+    Box, Button, Container, Paper, TextField, useTheme
 } from '@mui/material';
 import { useDispatch, useSelector } from 'react-redux';
 import { v4 as uuidv4 } from 'uuid';

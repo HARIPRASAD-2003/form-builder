@@ -180,14 +180,6 @@ const DerivedFieldModal = ({ open, onClose, field, onSave }: any) => {
             onChange={(e) => setFormulaDisplay(e.target.value)}
             helperText={`Example: yearsBetween({${allFields.find((f:any) => f.id === localParents[0])?.label || "DOB"}})`}
           />
-
-          {/* Live Preview */}
-          <Box p={2} border="1px solid #ddd" borderRadius={1} bgcolor="#fafafa">
-            <Typography variant="subtitle2" color="text.secondary" mb={0.5}>
-              Live Preview
-            </Typography>
-            <Typography>{computePreview}</Typography>
-          </Box>
         </Box>
       </DialogContent>
 

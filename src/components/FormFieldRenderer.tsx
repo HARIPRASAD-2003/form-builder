@@ -6,25 +6,63 @@ import {
 import { toast } from 'react-toastify';
 
 const validateField = (value: any, field: any): string | null => {
-  if (field.required && (!value || (Array.isArray(value) && value.length === 0))) {
-    return 'This field is required';
+  // Check required: treat empty string, null, undefined, or empty array as empty
+  if (field.required) {
+    if (
+      value === null ||
+      value === undefined ||
+      (typeof value === 'string' && value.trim() === '') ||
+      (Array.isArray(value) && value.length === 0)
+    ) {
+      return 'This field is required';
+    }
   }
-  const { validations } = field;
 
-  if (validations) {
-    if (validations.minLength && value?.length < validations.minLength)
-      return `Minimum length is ${validations.minLength}`;
-    if (validations.maxLength && value?.length > validations.maxLength)
-      return `Maximum length is ${validations.maxLength}`;
-    if (validations.pattern && !new RegExp(validations.pattern).test(value))
-      return `Invalid format`;
-    if (validations.isEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value))
-      return 'Invalid email format';
-    if (validations.isPassword && !/^(?=.*\d).{8,}$/.test(value))
-      return 'Password must be at least 8 characters and contain a number';
+  const { validations } = field;
+  if (!validations) return null;
+
+  const valLength = value ? value.length : 0;
+  const minLength = Number(validations.minLength);
+  const maxLength = Number(validations.maxLength);
+
+  console.log(validations);
+  if (!isNaN(minLength) && valLength < minLength) {
+    return `Minimum length is ${minLength}`;
   }
+
+  if (!isNaN(maxLength) && valLength > maxLength) {
+    return `Maximum length is ${maxLength}`;
+  }
+
+  if (validations.pattern) {
+    try {
+      const regex = new RegExp(validations.pattern);
+      if (typeof value !== 'string' || !regex.test(value)) {
+        return 'Invalid format';
+      }
+    } catch {
+      return 'Invalid regex pattern';
+    }
+  }
+
+  if (validations.isEmail) {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (typeof value !== 'string' || !emailRegex.test(value)) {
+      return 'Invalid email format';
+    }
+  }
+
+  if (validations.isPassword) {
+    // Password must be at least 8 chars and include a number
+    const pwdRegex = /^(?=.*\d).{8,}$/;
+    if (typeof value !== 'string' || !pwdRegex.test(value)) {
+      return 'Password must be at least 8 characters and contain a number';
+    }
+  }
+
   return null;
 };
+
 
 interface FormFieldRendererProps {
   field: any;

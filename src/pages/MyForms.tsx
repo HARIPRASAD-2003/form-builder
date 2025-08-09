@@ -60,7 +60,7 @@ const MyForms: React.FC = () => {
     dispatch(resetForm());
     dispatch(setFormMeta({ formName: form.formName, description: form.description }));
     form.fields.forEach((f) => dispatch(addField(f)));
-    navigate("/builder");
+    navigate("/create");
   };
 
   return (
