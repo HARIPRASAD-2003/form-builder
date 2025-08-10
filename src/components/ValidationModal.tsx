@@ -2,7 +2,11 @@ import React, { useEffect, useState } from 'react';
 import {
   Dialog, DialogTitle, DialogContent, DialogActions,
   TextField, Button, Box, FormControlLabel, Checkbox,
-  Typography
+  Typography,
+  RadioGroup,
+  Radio,
+  FormControl,
+  FormLabel
 } from '@mui/material';
 
 const ValidationModal = ({ open, onClose, field, onSave }: any) => {
@@ -11,13 +15,39 @@ const ValidationModal = ({ open, onClose, field, onSave }: any) => {
   const [regexError, setRegexError] = useState('');
   const [customRuleError, setCustomRuleError] = useState('');
   const [errors, setErrors] = useState<{ minMax?: string }>({});
+  const [validationType, setValidationType] = useState<string>('');
 
   const handleChange = (key: string, value: string) => {
-    setLocal({ ...local, [key]: value });
+    setLocal((prev: any) => ({ ...prev, [key]: value }));
   };
 
-  const handleCheckbox = (key: string, checked: boolean) => {
-    setLocal({ ...local, [key]: checked });
+  const clearValidationInputs = () => {
+    setLocal((prev: any) => ({ ...prev, pattern: '', customRule: '', ruleDescription: '' }));
+    setRegexError('');
+    setCustomRuleError('');
+    setErrors({});
+    setValidationType('none');
+  };
+
+
+
+  // click handler to support toggle-on-second-click
+  const handleRadioClick = (selectedValue: string) => {
+    setLocal((prev: any) => {
+      const currentlySelected =
+        (selectedValue === 'isEmail' && !!prev.isEmail) ||
+        (selectedValue === 'isPassword' && !!prev.isPassword);
+
+      if (currentlySelected) {
+        return { ...prev, isEmail: false, isPassword: false };
+      }
+
+      return {
+        ...prev,
+        isEmail: selectedValue === 'isEmail',
+        isPassword: selectedValue === 'isPassword',
+      };
+    });
   };
 
   const validate = (data: any) => {
@@ -33,7 +63,8 @@ const ValidationModal = ({ open, onClose, field, onSave }: any) => {
     }
 
     // Regex validation
-    if (data.pattern) {
+    if (validationType === "regex" && data.pattern) {
+      handleChange('customRule', '');
       try {
         new RegExp(data.pattern);
         setRegexError('');
@@ -46,7 +77,8 @@ const ValidationModal = ({ open, onClose, field, onSave }: any) => {
     }
 
     // Custom JS rule validation
-    if (data.customRule) {
+    if (validationType === "customJS" && data.customRule) {
+      handleChange('pattern', '');
       try {
         // eslint-disable-next-line no-new-func
         const fn = new Function('value', `return ${data.customRule}`);
@@ -108,29 +140,79 @@ const ValidationModal = ({ open, onClose, field, onSave }: any) => {
             />
           </Box>
 
-          {/* Pattern (Regex) */}
-          <TextField
-            label="Pattern (Regex)"
-            size="small"
-            variant="outlined"
-            fullWidth
-            value={local.pattern || ''}
-            onChange={(e) => handleChange('pattern', e.target.value)}
-            helperText={regexError || 'Enter a valid regex pattern'}
-            error={!!regexError}
-          />
+          <FormControl component="fieldset">
+            <FormLabel component="legend">Validation Type</FormLabel>
+            <Box display="flex" alignItems="center">
+              <RadioGroup
+                row
+                value={validationType}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  setValidationType((prev) => (prev === value ? "none" : value));
+                }}
+              >
+                {/* Hidden clear option */}
+                <FormControlLabel value="none" control={<Radio sx={{ display: "none" }} />} label="" />
+                <FormControlLabel value="regex" control={<Radio />} label="Pattern (Regex)" />
+                <FormControlLabel value="customJS" control={<Radio />} label="Custom JS Rule" />
+              </RadioGroup>
 
-          {/* Custom JS Rule */}
-          <TextField
-            label="Custom JS Rule"
+              {validationType !== "none" && <Button
+                size="small"
+                variant="outlined"
+                sx={{ ml: 2 }}
+                onClick={clearValidationInputs}
+              >
+                Clear
+              </Button>}
+            </Box>
+          </FormControl>
+
+
+
+          {validationType === 'regex' && (
+            <TextField
+              label="Pattern (Regex)"
+              size="small"
+              variant="outlined"
+              fullWidth
+              value={local.pattern || ''}
+              onChange={(e) => handleChange('pattern', e.target.value)}
+              helperText={
+                regexError ||
+                'Enter a valid regex pattern. Example: ^[A-Z]{3}\\d{3}$ (3 letters followed by 3 digits)'
+              }
+              error={!!regexError}
+            />
+
+          )}
+
+          {validationType === 'customJS' && (
+            <TextField
+              label="Custom JS Rule"
+              size="small"
+              variant="outlined"
+              fullWidth
+              value={local.customRule || ''}
+              onChange={(e) => handleChange('customRule', e.target.value)}
+              helperText={
+                customRuleError ||
+                'Must return true/false. Example: value.length > 5 (valid if more than 5 characters)'
+              }
+              error={!!customRuleError}
+            />
+
+          )}
+
+          {(validationType === "regex" || validationType === "customJS") && <TextField
+            label="Rule Description"
             size="small"
             variant="outlined"
             fullWidth
-            value={local.customRule || ''}
-            onChange={(e) => handleChange('customRule', e.target.value)}
-            helperText={customRuleError || 'Must return true/false. Example: value.length > 5'}
-            error={!!customRuleError}
-          />
+            value={local.ruleDescription || ''}
+            onChange={(e) => handleChange('ruleDescription', e.target.value)}
+          />}
+
 
           {/* Quick Toggles */}
           <Box>
@@ -138,26 +220,21 @@ const ValidationModal = ({ open, onClose, field, onSave }: any) => {
               Quick Validation Toggles
             </Typography>
 
-            <Box display="flex" flexDirection="column" gap={1}>
+            <RadioGroup
+              value={local.isEmail ? 'isEmail' : local.isPassword ? 'isPassword' : ''}
+            >
               <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={!!local.isEmail}
-                    onChange={(e) => handleCheckbox('isEmail', e.target.checked)}
-                  />
-                }
+                value="isEmail"
+                control={<Radio slotProps={{ input: { onClick: () => handleRadioClick('isEmail') } }} />}
                 label="Must be a valid email"
               />
               <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={!!local.isPassword}
-                    onChange={(e) => handleCheckbox('isPassword', e.target.checked)}
-                  />
-                }
+                value="isPassword"
+                control={<Radio slotProps={{ input: { onClick: () => handleRadioClick('isPassword') } }} />}
                 label="Must match password rules (8+ chars, include number)"
               />
-            </Box>
+            </RadioGroup>
+
           </Box>
         </Box>
       </DialogContent>

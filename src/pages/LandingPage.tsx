@@ -31,7 +31,6 @@ export default function LandingPage() {
                     Build, Preview, and Share Forms – Smarter & Faster
                 </Typography>
                 <Button variant="contained" color="secondary" sx={{ mr: 2 }} onClick={() => navigate('/create')}>Try Now</Button>
-                <Button variant="outlined" color="inherit">View Demo</Button>
             </Box>
 
             {/* Features Section */}

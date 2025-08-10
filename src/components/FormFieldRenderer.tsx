@@ -19,7 +19,7 @@ const validateField = (value: any, field: any): string | null => {
   }
 
   const { validations } = field;
-  if (!validations) return null;
+  if (!validations || field.type !== 'text') return null;
 
   const valLength = value ? value.length : 0;
   const minLength = Number(validations.minLength);
@@ -37,7 +37,7 @@ const validateField = (value: any, field: any): string | null => {
     try {
       const regex = new RegExp(validations.pattern);
       if (typeof value !== 'string' || !regex.test(value)) {
-        return 'Invalid format';
+        return validations.ruleDescription;
       }
     } catch {
       return 'Invalid regex pattern';
@@ -56,6 +56,22 @@ const validateField = (value: any, field: any): string | null => {
     const pwdRegex = /^(?=.*\d).{8,}$/;
     if (typeof value !== 'string' || !pwdRegex.test(value)) {
       return 'Password must be at least 8 characters and contain a number';
+    }
+  }
+
+  if (validations.customRule) {
+    try {
+      // eslint-disable-next-line no-new-func
+      const fn = new Function('value', `return ${validations.customRule}`);
+      const result = fn(value);
+      if (typeof result !== 'boolean') {
+        return 'Custom rule must return true or false';
+      }
+      if (!result) {
+        return validations.ruleDescription;
+      }
+    } catch {
+      return 'Invalid custom rule syntax';
     }
   }
 

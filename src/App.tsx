@@ -10,10 +10,7 @@ import LandingPage from './pages/LandingPage';
 
 function App() {
   return (
-    <Router>
-      <Navbar />
-
-      {/* Toast Container (place outside Routes to be global) */}
+    <>
       <ToastContainer
         position="top-right"
         autoClose={1000}
@@ -24,14 +21,19 @@ function App() {
         draggable
         theme="light"
       />
+      <Router>
+        <Navbar />
 
-      <Routes>
-        <Route path="/create" element={<CreateForm />} />
-        <Route path="/preview" element={<PreviewForm />} />
-        <Route path="/myforms" element={<MyForms />} />
-        <Route path="*" element={<LandingPage />} />
-      </Routes>
-    </Router>
+        {/* Toast Container (place outside Routes to be global) */}
+
+        <Routes>
+          <Route path="/create" element={<CreateForm />} />
+          <Route path="/preview" element={<PreviewForm />} />
+          <Route path="/myforms" element={<MyForms />} />
+          <Route path="*" element={<LandingPage />} />
+        </Routes>
+      </Router>
+    </>
   );
 }
 

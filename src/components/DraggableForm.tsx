@@ -171,9 +171,9 @@ const DraggableField = ({ field, index, moveField, onDelete, onUpdate, onDuplica
                 </FormControl>
 
                 {/* Three-dot menu */}
-                <IconButton onClick={handleMenuOpen}>
+                {['text', 'date', 'textarea', 'number'].includes(field.type) && <IconButton onClick={handleMenuOpen}>
                     <MoreVertIcon />
-                </IconButton>
+                </IconButton>}
                 <Menu anchorEl={anchorEl} open={openMenu} onClose={handleMenuClose}>
                     <MenuItem
                         onClick={() => {

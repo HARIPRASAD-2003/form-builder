@@ -17,6 +17,8 @@ import {
   OutlinedInput
 } from "@mui/material";
 import { formulaHelpers } from "../utils/formulas";
+import { hasAnyCycle } from "../utils/cycleDetection";
+import { toast } from "react-toastify";
 
 const DerivedFieldModal = ({ open, onClose, field, onSave }: any) => {
   const allFields = useSelector((state: any) => state.form.fields);
@@ -50,46 +52,33 @@ const DerivedFieldModal = ({ open, onClose, field, onSave }: any) => {
     return result;
   };
 
-  /** Compute live preview */
-  const computePreview = useMemo(() => {
-    try {
-      const idFormula = labelToIdFormula(formulaDisplay);
-
-      // Map field values
-      const values: Record<string, any> = {};
-      localParents.forEach((pid) => {
-        const pf = allFields.find((f: any) => f.id === pid);
-        values[pid] = pf?.value ?? "";
-      });
-
-      // Replace placeholders {id} with values
-      let code = idFormula;
-      for (const [id, val] of Object.entries(values)) {
-        code = code.replaceAll(`{${id}}`, JSON.stringify(val));
-      }
-
-      // eslint-disable-next-line no-new-func
-      const fn = new Function(
-        "helpers",
-        `with(helpers) { return (${code}); }`
-      );
-      return String(fn(formulaHelpers));
-    } catch (e) {
-      return "⚠️ Error in formula";
-    }
-  }, [formulaDisplay, localParents, allFields]);
-
   /** Save handler */
   const handleSave = () => {
-    const idFormula = labelToIdFormula(formulaDisplay);
-    onSave({
-      ...field,
-      isDerived: true,
-      formula: idFormula,
-      parentFields: localParents
-    });
-    onClose();
-  };
+  const idFormula = labelToIdFormula(formulaDisplay);
+
+  // Build a new fields array with the proposed change
+  const updatedFields = allFields.map((f:any) =>
+    f.id === field.id
+      ? { ...field, isDerived: true, formula: idFormula, parentFields: localParents } 
+      : f
+  );
+
+  // Check for cycles BEFORE saving
+  if (hasAnyCycle(updatedFields)) {
+    toast.error("Derived Field Cycle detected! Please adjust parent field selection.");
+    console.log("cycyle")
+    return; 
+  }
+
+  onSave({
+    ...field,
+    isDerived: true,
+    formula: idFormula,
+    parentFields: localParents
+  });
+  onClose();
+};
+
 
   useEffect(() => {
     if (open) {
@@ -178,7 +167,7 @@ const DerivedFieldModal = ({ open, onClose, field, onSave }: any) => {
             fullWidth
             value={formulaDisplay}
             onChange={(e) => setFormulaDisplay(e.target.value)}
-            helperText={`Example: yearsBetween({${allFields.find((f:any) => f.id === localParents[0])?.label || "DOB"}})`}
+            helperText={`Example: yearsBetween({DOB}})`}
           />
         </Box>
       </DialogContent>

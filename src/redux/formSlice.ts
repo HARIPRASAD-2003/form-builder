@@ -1,6 +1,6 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
-interface FormField {
+export interface FormField {
     id: string;
     type: string;
     label: string;
@@ -12,6 +12,7 @@ interface FormField {
         maxLength?: number;
         pattern?: string;
         customRule?: string;
+        ruleDescription ?: string,
         isEmail?: boolean;
         isPassword?: boolean;
     };

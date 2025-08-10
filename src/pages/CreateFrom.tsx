@@ -17,6 +17,7 @@ import {
 import DraggableField from '../components/DraggableForm';
 import EditableDescription from '../components/EditableDescription';
 
+
 const CreateForm = () => {
     const dispatch = useDispatch();
     const theme = useTheme();
@@ -55,34 +56,37 @@ const CreateForm = () => {
     const handleSaveForm = () => {
         if (title.trim() === "") setTitle("Untitled Form");
 
-        dispatch(setFormMeta({ formName: title, description: desc }));
-
+        // Show toast first
         const savedForms = JSON.parse(localStorage.getItem("forms") || "[]");
+        const existingIndex = savedForms.findIndex((f: any) => f.formName === title);
 
-        // Check if this form already exists (match by formName or better: uniqueId)
-        const existingIndex = savedForms.findIndex(
-            (f: any) => f.formName === title
-        );
+        if (existingIndex >= 0) {
+            toast.success("Form updated!");
+        } else {
+            toast.success("Form saved to localStorage!");
+        }
+
+        dispatch(setFormMeta({ formName: title, description: desc }));
 
         const saved = {
             formName: title,
             description: desc,
             fields,
-            timestamp: existingIndex >= 0 ? savedForms[existingIndex].timestamp : new Date().toISOString(), // keep old timestamp if updating
+            timestamp:
+                existingIndex >= 0
+                    ? savedForms[existingIndex].timestamp
+                    : new Date().toISOString(),
         };
 
         if (existingIndex >= 0) {
-            // Update existing form
             savedForms[existingIndex] = saved;
-            toast.success("Form updated!");
         } else {
-            // Add as new form
             savedForms.push(saved);
-            toast.success("Form saved to localStorage!");
         }
 
         localStorage.setItem("forms", JSON.stringify(savedForms));
     };
+
 
 
 
