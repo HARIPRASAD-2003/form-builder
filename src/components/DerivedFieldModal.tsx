@@ -54,21 +54,20 @@ const DerivedFieldModal = ({ open, onClose, field, onSave }: any) => {
 
   /** Save handler */
   const handleSave = () => {
-  const idFormula = labelToIdFormula(formulaDisplay);
+    const idFormula = labelToIdFormula(formulaDisplay);
 
-  // Build a new fields array with the proposed change
-  const updatedFields = allFields.map((f:any) =>
-    f.id === field.id
-      ? { ...field, isDerived: true, formula: idFormula, parentFields: localParents } 
-      : f
-  );
+    // Build a new fields array with the proposed change
+    const updatedFields = allFields.map((f: any) =>
+      f.id === field.id
+        ? { ...field, isDerived: true, formula: idFormula, parentFields: localParents }
+        : f
+    );
 
-  // Check for cycles BEFORE saving
-  if (hasAnyCycle(updatedFields)) {
-    toast.error("Derived Field Cycle detected! Please adjust parent field selection.");
-    console.log("cycyle")
-    return; 
-  }
+    // Check for cycles BEFORE saving
+    if (hasAnyCycle(updatedFields)) {
+      toast.error("Derived Field Cycle detected! Please adjust parent field selection.");
+      return;
+    }
 
   onSave({
     ...field,

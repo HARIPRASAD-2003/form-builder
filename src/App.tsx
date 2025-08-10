@@ -4,32 +4,20 @@ import CreateForm from './pages/CreateFrom';
 import PreviewForm from './pages/PreviewForm';
 import MyForms from './pages/MyForms';
 import Navbar from './components/Navbar';
-import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import LandingPage from './pages/LandingPage';
+import ToastTestPage from './pages/testingPage';
 
 function App() {
   return (
     <>
-      <ToastContainer
-        position="top-right"
-        autoClose={1000}
-        hideProgressBar={false}
-        newestOnTop
-        closeOnClick
-        pauseOnHover
-        draggable
-        theme="light"
-      />
       <Router>
         <Navbar />
-
-        {/* Toast Container (place outside Routes to be global) */}
-
         <Routes>
           <Route path="/create" element={<CreateForm />} />
           <Route path="/preview" element={<PreviewForm />} />
           <Route path="/myforms" element={<MyForms />} />
+          <Route path="/toast-test" element={<ToastTestPage />} />
           <Route path="*" element={<LandingPage />} />
         </Routes>
       </Router>
