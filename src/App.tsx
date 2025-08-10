@@ -6,7 +6,6 @@ import MyForms from './pages/MyForms';
 import Navbar from './components/Navbar';
 import 'react-toastify/dist/ReactToastify.css';
 import LandingPage from './pages/LandingPage';
-import ToastTestPage from './pages/testingPage';
 
 function App() {
   return (
@@ -17,7 +16,6 @@ function App() {
           <Route path="/create" element={<CreateForm />} />
           <Route path="/preview" element={<PreviewForm />} />
           <Route path="/myforms" element={<MyForms />} />
-          <Route path="/toast-test" element={<ToastTestPage />} />
           <Route path="*" element={<LandingPage />} />
         </Routes>
       </Router>
